@@ -9,8 +9,9 @@ using CppAD::AD;
 // Init static const variables
 //////////
 // Set the timestep length and duration
-const size_t N = 10;
-const double dt = 0.1;
+const size_t MPC::N = 10;
+const double MPC::dt = 0.1;
+
 // This value assumes the model presented in the classroom is used.
 //
 // It was obtained by measuring the radius formed by running the vehicle in the
@@ -21,19 +22,21 @@ const double dt = 0.1;
 // presented in the classroom matched the previous radius.
 //
 // This is the length from front to CoG that has a similar radius.
-const double Lf = 2.67;
-// Reference velocity set to 40 mph
- const double ref_v = 40.0;
+const double MPC::Lf = 2.67;
+
+// Both the reference cross track and orientation errors are 0.
+// The reference velocity is set to 40 mph.
+const double MPC::ref_v = 40.0;
 
 // State variables and actuator
 size_t x_start     = 0;
-size_t y_start     = x_start     + N;
-size_t psi_start   = y_start     + N;
-size_t v_start     = psi_start   + N;
-size_t cte_start   = v_start     + N;
-size_t epsi_start  = cte_start   + N;
-size_t delta_start = epsi_start  + N;
-size_t a_start     = delta_start + N - 1;
+size_t y_start     = x_start     + MPC::N;
+size_t psi_start   = y_start     + MPC::N;
+size_t v_start     = psi_start   + MPC::N;
+size_t cte_start   = v_start     + MPC::N;
+size_t epsi_start  = cte_start   + MPC::N;
+size_t delta_start = epsi_start  + MPC::N;
+size_t a_start     = delta_start + MPC::N - 1;
 
 // Definition of class that computes objective and constraints
 class FG_eval
@@ -55,7 +58,7 @@ public:
     {
       fg[0] += 1.0  * CppAD::pow(vars[cte_start  + t], 2);
       fg[0] += 1.0  * CppAD::pow(vars[epsi_start + t], 2);
-      fg[0] += 0.01 * CppAD::pow(vars[v_start    + t] - ref_v, 2);
+      fg[0] += 0.01 * CppAD::pow(vars[v_start    + t] - MPC::ref_v, 2);
     }
     // Minimize the use of actuators.
     for (size_t t = 0; t < MPC::N - 1; t++)
@@ -64,7 +67,7 @@ public:
       fg[0] += 0.25 * CppAD::pow(vars[a_start     + t], 2);
     }
     // Minimize the value gap between sequential actuations.
-    for (size_t t = 0; t < N - 2; t++)
+    for (size_t t = 0; t < MPC::N - 2; t++)
     {
       fg[0] += 4.0 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
       fg[0] += 1.0 * CppAD::pow(vars[a_start     + t + 1] - vars[a_start     + t], 2);
@@ -111,8 +114,8 @@ public:
       // State transitions
       if ( fabs(yawRate0) < 0.0001 )
       {
-        fg[1 + x_start    + t] = x1 -  (x0               + v0 * CppAD::cos(psi0) * dt);
-        fg[1 + y_start    + t] = y1 -  (y0               + v0 * CppAD::sin(psi0) * dt);
+        fg[1 + x_start    + t] = x1 -  (x0               + v0 * CppAD::cos(psi0) * MPC::dt);
+        fg[1 + y_start    + t] = y1 -  (y0               + v0 * CppAD::sin(psi0) * MPC::dt);
       }
       else
       {
