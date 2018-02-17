@@ -136,23 +136,11 @@ int main() {
 		  vector<double> mpc_x_vals;
 		  vector<double> mpc_y_vals;
 
-          std::cout << "REFERENCE: {(x, y) -> (x, y) -> ...} = " << std::endl
-                    << "           {("
-                    << xvals[0] << ", " << yvals[0] << ") -> ("
-                    << xvals[1] << ", " << yvals[1] << ") -> ...}" << std::endl;
           std::cout << "INPUT:     {x, y, psi, v, cte, epsi} = " << std::endl
                     << "           {"
                     << state[0] << ", " << state[1] << ", " << state[2] << ", " << state[3] << ", " << state[4] << "}" << std::endl;
 
           mpc.Solve(state, coeffs, delta, a, mpc_x_vals, mpc_y_vals);
-
-          std::cout << "OUTPUT:    {delta, a}                = " << std::endl
-                    << "           {"
-                    << delta << ", " << a << "}" << std::endl;
-          std::cout << "MPC:       {(x, y) -> (x, y) -> ...} = " << std::endl
-                    << "           {("
-                    << mpc_x_vals[0] << ", " << mpc_y_vals[0] << ") -> ("
-                    << mpc_x_vals[1] << ", " << mpc_y_vals[1] << ") -> ...}" << std::endl << std::endl;
 
           /*
           * Calculate steering angle and throttle using MPC.
@@ -165,12 +153,19 @@ int main() {
 		  if (throttle_value < -1.0) throttle_value = -1.0;
 		  if (throttle_value >  1.0) throttle_value = 1.0;
 
+		  std::cout << "OUTPUT:    {steer, a}                = " << std::endl
+			  << "           {"
+			  << steer_value << ", " << a << "}" << std::endl;
+		  std::cout << "MPC:       {(x, y) -> (x, y)} = " << std::endl
+			  << "           {("
+			  << mpc_x_vals[0] << ", " << mpc_y_vals[0] << ") -> ("
+			  << mpc_x_vals[1] << ", " << mpc_y_vals[1] << ") }" << std::endl << std::endl;
 
           json msgJson;
           
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
-		                      //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
+		  //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
 
           msgJson["mpc_x"] = mpc_x_vals;
