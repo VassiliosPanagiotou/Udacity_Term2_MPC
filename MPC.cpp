@@ -5,6 +5,26 @@
 
 using CppAD::AD;
 
+//////////
+// Init static const variables
+//////////
+// Set the timestep length and duration
+const size_t N = 10;
+const double dt = 0.1;
+// This value assumes the model presented in the classroom is used.
+//
+// It was obtained by measuring the radius formed by running the vehicle in the
+// simulator around in a circle with a constant steering angle and velocity on a
+// flat terrain.
+//
+// Lf was tuned until the the radius formed by the simulating the model
+// presented in the classroom matched the previous radius.
+//
+// This is the length from front to CoG that has a similar radius.
+const double Lf = 2.67;
+// Reference velocity set to 40 mph
+ const double ref_v = 40.0;
+
 // State variables and actuator
 size_t x_start     = 0;
 size_t y_start     = x_start     + N;
@@ -28,25 +48,22 @@ public:
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
   void operator()(ADvector& fg, const ADvector& vars) {
-    // mplement MPC
+    // Implement MPC
     // Cost is the first element of `fg`.
     fg[0] = 0;
-
     // Cost based on the reference state.
-    for (size_t t = 0; t < N; t++)
+    for (size_t t = 0; t < MPC::N; t++)
     {
       fg[0] += 1.0  * CppAD::pow(vars[cte_start  + t], 2);
       fg[0] += 1.0  * CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += 0.01 * CppAD::pow(vars[v_start    + t] - ref_v, 2);
     }
-
     // Minimize the use of actuators.
-    for (size_t t = 0; t < N - 1; t++)
+    for (size_t t = 0; t < MPC::N - 1; t++)
     {
       fg[0] += 1.0  * CppAD::pow(vars[delta_start + t], 2);
       fg[0] += 0.25 * CppAD::pow(vars[a_start     + t], 2);
     }
-
     // Minimize the value gap between sequential actuations.
     for (size_t t = 0; t < N - 2; t++)
     {
@@ -54,17 +71,15 @@ public:
       fg[0] += 1.0 * CppAD::pow(vars[a_start     + t + 1] - vars[a_start     + t], 2);
     }
 
-     // Initial constraints
-    //
+    // Initial constraints
     fg[x_start + 1]    = vars[x_start];
     fg[y_start + 1]    = vars[y_start];
     fg[psi_start + 1]  = vars[psi_start];
     fg[v_start + 1]    = vars[v_start];
     fg[cte_start + 1]  = vars[cte_start];
     fg[epsi_start + 1] = vars[epsi_start];
-
     // Constraints
-    for (size_t t = 1; t < N; t++)
+    for (size_t t = 1; t < MPC::N; t++)
     {
       // State at time t+1 .
       AD<double> x1    = vars[x_start    + t];
@@ -87,7 +102,7 @@ public:
       AD<double> a0     = vars[a_start     + t - 1];
 
       // Yaw rate at time t
-      AD<double> yawRate0 = v0 * delta0 / Lf;
+      AD<double> yawRate0 = v0 * delta0 / MPC::Lf;
 
       // desired y0 value according to polynomial coefficients
       AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs[2] * CppAD::pow(x0, 2) + coeffs[3] * CppAD::pow(x0, 3);
@@ -102,13 +117,13 @@ public:
       }
       else
       {
-        fg[1 + x_start    + t] = x1 -  (x0               + (v0 / yawRate0) * (CppAD::sin(psi0 + yawRate0 * dt) - CppAD::sin(psi0)) );
-        fg[1 + y_start    + t] = y1 -  (y0               + (v0 / yawRate0) * (CppAD::cos(psi0)                      - CppAD::cos(psi0 + yawRate0 * dt)) );
+        fg[1 + x_start    + t] = x1 -  (x0               + (v0 / yawRate0) * (CppAD::sin(psi0 + yawRate0 * MPC::dt) - CppAD::sin(psi0)) );
+        fg[1 + y_start    + t] = y1 -  (y0               + (v0 / yawRate0) * (CppAD::cos(psi0)                      - CppAD::cos(psi0 + yawRate0 * MPC::dt)) );
       }
-      fg[1 + psi_start  + t] = psi1 -  (psi0             + v0 * delta0 / Lf * dt);
-      fg[1 + v_start    + t] = v1 -    (v0               + a0 * dt);
-      fg[1 + cte_start  + t] = cte1 -  ((f0 - y0)        + (v0 * CppAD::sin(epsi0) * dt));
-      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
+      fg[1 + psi_start  + t] = psi1 -  (psi0             + v0 * delta0 / MPC::Lf * MPC::dt);
+      fg[1 + v_start    + t] = v1 -    (v0               + a0 * MPC::dt);
+      fg[1 + cte_start  + t] = cte1 -  ((f0 - y0)        + (v0 * CppAD::sin(epsi0) * MPC::dt));
+      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / MPC::Lf * MPC::dt);
     }
     // `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
     // NOTE: You'll probably go back and forth between this function and
@@ -119,31 +134,7 @@ public:
 //
 // MPC class definition implementation.
 //
-MPC::MPC()  : N(0), 
-			, dt(0.1)
-			, Lf(2.67)
-			, ref_v(40.0)
-{
-	// Set the timestep length and duration
-	// const size_t N = 10;
-	// const double dt = 0.1;
-
-	// This value assumes the model presented in the classroom is used.
-	//
-	// It was obtained by measuring the radius formed by running the vehicle in the
-	// simulator around in a circle with a constant steering angle and velocity on a
-	// flat terrain.
-	//
-	// Lf was tuned until the the radius formed by the simulating the model
-	// presented in the classroom matched the previous radius.
-	//
-	// This is the length from front to CoG that has a similar radius.
-	// const double Lf = 2.67;
-
-	// Reference velocity set to 40 mph
-	// const double ref_v = 40.0;
-
-}
+MPC::MPC() {}
 MPC::~MPC() {}
 
 bool MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y) {

@@ -23,12 +23,12 @@ public:
 	bool Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y);
 
 	// Timestep length and duration
-	const size_t N;
-	const double dt;
+	static const size_t N;
+	static const double dt;
 	// Length from front to CoG
-	const double Lf;
+	static const double Lf;
 	// Reference velocity
-	const double ref_v;
+	static const double ref_v;
 };
 
 #endif /* MPC_H */
