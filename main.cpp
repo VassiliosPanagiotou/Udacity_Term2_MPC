@@ -148,10 +148,10 @@ int main() {
           */
           double steer_value    = -delta / deg2rad(25);
           double throttle_value = a;
-		  if (steer_value < -1.0) steer_value = -1.0;
-		  if (steer_value >  1.0) steer_value = 1.0;
-		  if (throttle_value < -1.0) throttle_value = -1.0;
-		  if (throttle_value >  1.0) throttle_value = 1.0;
+		  //if (steer_value < -1.0) steer_value = -1.0;
+		  //if (steer_value >  1.0) steer_value = 1.0;
+		  //if (throttle_value < -1.0) throttle_value = -1.0;
+		  //if (throttle_value >  1.0) throttle_value = 1.0;
 
 		  std::cout << "OUTPUT:    {steer, a}                = " << std::endl
 			  << "           {"
