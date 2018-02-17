@@ -131,7 +131,10 @@ int main() {
           state[4] = polyeval(coeffs, state[0]) - state[1];
           state[5] = state[2] - atan(coeffs[1] + 2.0 * coeffs[2] * state[0] + 3.0 * coeffs[3] * state[0] * state[0]);
           double delta, a;
-          vector<double> mpc_x_vals, mpc_y_vals;
+
+		  // Calculate MPC predicted trajectory 
+		  vector<double> mpc_x_vals;
+		  vector<double> mpc_y_vals;
 
           std::cout << "REFERENCE: {(x, y) -> (x, y) -> ...} = " << std::endl
                     << "           {("
@@ -167,12 +170,7 @@ int main() {
           
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
-
-          //Display the MPC predicted trajectory 
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
-
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
+		                      //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
 
           msgJson["mpc_x"] = mpc_x_vals;
