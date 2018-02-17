@@ -5,28 +5,7 @@
 
 using CppAD::AD;
 
-// Set the timestep length and duration
-const size_t N = 10;
-const double dt = 0.1;
-
-// This value assumes the model presented in the classroom is used.
-//
-// It was obtained by measuring the radius formed by running the vehicle in the
-// simulator around in a circle with a constant steering angle and velocity on a
-// flat terrain.
-//
-// Lf was tuned until the the radius formed by the simulating the model
-// presented in the classroom matched the previous radius.
-//
-// This is the length from front to CoG that has a similar radius.
-const double Lf = 2.67;
-
-// Reference velocity set to 40 mph
-const double ref_v = 40.0;
-
-// The solver takes all the state variables and actuator
-// variables in a singular vector. Thus, we should to establish
-// when one variable starts and another ends to make our lifes easier.
+// State variables and actuator
 size_t x_start     = 0;
 size_t y_start     = x_start     + N;
 size_t psi_start   = y_start     + N;
@@ -49,7 +28,7 @@ public:
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
   void operator()(ADvector& fg, const ADvector& vars) {
-    // TODO: implement MPC
+    // mplement MPC
     // Cost is the first element of `fg`.
     fg[0] = 0;
 
@@ -87,7 +66,7 @@ public:
     // Constraints
     for (size_t t = 1; t < N; t++)
     {
-      // The state at time t+1 .
+      // State at time t+1 .
       AD<double> x1    = vars[x_start    + t];
       AD<double> y1    = vars[y_start    + t];
       AD<double> psi1  = vars[psi_start  + t];
@@ -95,7 +74,7 @@ public:
       AD<double> cte1  = vars[cte_start  + t];
       AD<double> epsi1 = vars[epsi_start + t];
 
-      // The state at time t.
+      // State at time t.
       AD<double> x0    = vars[x_start    + t - 1];
       AD<double> y0    = vars[y_start    + t - 1];
       AD<double> psi0  = vars[psi_start  + t - 1];
@@ -140,7 +119,31 @@ public:
 //
 // MPC class definition implementation.
 //
-MPC::MPC() {}
+MPC::MPC()  : N(0), 
+			, dt(0.1)
+			, Lf(2.67)
+			, ref_v(40.0)
+{
+	// Set the timestep length and duration
+	// const size_t N = 10;
+	// const double dt = 0.1;
+
+	// This value assumes the model presented in the classroom is used.
+	//
+	// It was obtained by measuring the radius formed by running the vehicle in the
+	// simulator around in a circle with a constant steering angle and velocity on a
+	// flat terrain.
+	//
+	// Lf was tuned until the the radius formed by the simulating the model
+	// presented in the classroom matched the previous radius.
+	//
+	// This is the length from front to CoG that has a similar radius.
+	// const double Lf = 2.67;
+
+	// Reference velocity set to 40 mph
+	// const double ref_v = 40.0;
+
+}
 MPC::~MPC() {}
 
 bool MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y) {
