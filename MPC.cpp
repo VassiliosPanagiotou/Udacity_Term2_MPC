@@ -139,7 +139,7 @@ public:
 MPC::MPC() {}
 MPC::~MPC() {}
 
-bool MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y) {
+void MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y) {
   bool ok = true;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
@@ -247,13 +247,13 @@ bool MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	dou
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
-  if ( ok )
-  {
-    // Cost
-    auto cost = solution.obj_value;
-    std::cout << "Cost " << cost << std::endl;
-  }
-  else
+  if ( ! ok )
+  //{
+  //  // Cost
+  //  auto cost = solution.obj_value;
+  //  std::cout << "Cost " << cost << std::endl;
+  //}
+  //else
   {
     // Error message
     std::cout << "MPC::solve - Error occured!" << std::endl;
@@ -269,5 +269,4 @@ bool MPC::Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	dou
     trajectory_x[i] = solution.x[x_start + i];
     trajectory_y[i] = solution.x[y_start + i];
   }
-  return ok;
 }

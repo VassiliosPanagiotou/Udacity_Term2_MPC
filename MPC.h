@@ -20,7 +20,7 @@ public:
 	//@param  a              acceleration
 	//@param  trajectory_x   x component of the trajectory
 	//@param  trajectory_y   y component of the trajectory
-	bool Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y);
+	void Solve(const Eigen::VectorXd& state, const Eigen::VectorXd& coeffs,	double& delta, double& a, vector<double>& trajectory_x, vector<double>& trajectory_y);
 
 	// Timestep length and duration
 	static const size_t N;
